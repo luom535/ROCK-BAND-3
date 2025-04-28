@@ -2,17 +2,23 @@ using UnityEngine;
 
 public class PlaySoundOnKeyPress : MonoBehaviour
 {
-    public AudioClip clip; // Òª²¥·ÅµÄÒôÆµÆ¬¶Î
-    public KeyCode keyToPress = KeyCode.Space; // ´¥·¢²¥·ÅµÄ°´¼ü£¬Ä¬ÈÏÊÇ¿Õ¸ñ¼ü
+    [Header("è¾“å…¥è®¾ç½®")]
+    public KeyCode keyToPress = KeyCode.Space;     
 
-    private AudioSource audioSource;
+    [Header("å£°éŸ³è®¾ç½®")]
+    public AudioClip clip;                        
+
+    [Header("è§†è§‰é«˜äº®è®¾ç½®")]
+    public GameObject targetObject;               
+    public float outlineThickness = 2f;            
+    public float outlineDuration = 0.3f;           
+
+    private AudioSource audioSource;             
+    private Material spriteMat;            
 
     void Start()
     {
-        // ³¢ÊÔ»ñÈ¡ AudioSource ×é¼ş
         audioSource = GetComponent<AudioSource>();
-
-        // Èç¹ûÃ»ÓĞ£¬¾Í×Ô¶¯Ìí¼ÓÒ»¸ö
         if (audioSource == null)
         {
             audioSource = gameObject.AddComponent<AudioSource>();
@@ -20,13 +26,50 @@ public class PlaySoundOnKeyPress : MonoBehaviour
 
         audioSource.playOnAwake = false;
         audioSource.clip = clip;
+
+        if (targetObject != null)
+        {
+            SpriteRenderer sr = targetObject.GetComponent<SpriteRenderer>();
+            if (sr != null)
+            {
+                spriteMat = sr.material;
+                if (spriteMat.HasProperty("_OutlineThickness"))
+                {
+                    spriteMat.SetFloat("_OutlineThickness", 0); 
+                }
+                else
+                {
+                    Debug.LogWarning("æè´¨ä¸Šæ²¡æœ‰ '_OutlineThickness' å±æ€§ï¼");
+                }
+            }
+        }
     }
 
     void Update()
     {
         if (Input.GetKeyDown(keyToPress))
         {
-            audioSource.Play();
+            Debug.Log($"æŒ‰ä¸‹æŒ‰é”®ï¼š{keyToPress}");
+
+            if (clip != null)
+            {
+                audioSource.PlayOneShot(clip);
+            }
+
+            if (spriteMat != null)
+            {
+                spriteMat.SetFloat("_OutlineThickness", outlineThickness);
+                CancelInvoke(nameof(DisableOutline));
+                Invoke(nameof(DisableOutline), outlineDuration);
+            }
+        }
+    }
+
+    void DisableOutline()
+    {
+        if (spriteMat != null)
+        {
+            spriteMat.SetFloat("_OutlineThickness", 0);
         }
     }
 }
