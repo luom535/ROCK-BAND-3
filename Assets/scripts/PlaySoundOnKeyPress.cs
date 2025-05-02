@@ -1,46 +1,51 @@
 using UnityEngine;
+using System.Collections.Generic;
 
+[RequireComponent(typeof(AudioSource))]
 public class PlaySoundOnKeyPress : MonoBehaviour
 {
-    [Header("输入设置")]
-    public KeyCode keyToPress = KeyCode.Space;     
+    [Header("Input Setting")]
+    public KeyCode keyToPress = KeyCode.Space;
 
-    [Header("声音设置")]
-    public AudioClip clip;                        
+    [Header("Level 1 Sounds")]
+    public AudioClip[] clipsLevel1;
 
-    [Header("视觉高亮设置")]
-    public GameObject targetObject;               
-    public float outlineThickness = 2f;            
-    public float outlineDuration = 0.3f;           
+    [Header("Level 2 Sounds")]
+    public AudioClip[] clipsLevel2;
 
-    private AudioSource audioSource;             
-    private Material spriteMat;            
+    [Header("Level 3 Sounds")]
+    public AudioClip[] clipsLevel3;
+
+    [Header("Effect / Animator")]
+    public GameObject visualEffect;         // 可选：粒子效果或闪光 GameObject
+    public Animator targetAnimator;         // 可选：Animator 控件
+    public string triggerName = "Play";     // Animator Trigger 名称
+
+    private AudioSource audioSource;
+    private InstrumentInput instrumentInput;
 
     void Start()
     {
         audioSource = GetComponent<AudioSource>();
-        if (audioSource == null)
+        audioSource.playOnAwake = false;
+
+        instrumentInput = GetComponent<InstrumentInput>();
+        if (instrumentInput == null)
         {
-            audioSource = gameObject.AddComponent<AudioSource>();
+            Debug.LogWarning($"No InstrumentInput component found on {gameObject.name}!");
         }
 
-        audioSource.playOnAwake = false;
-        audioSource.clip = clip;
-
-        if (targetObject != null)
+        // 初始化时关闭特效
+        if (visualEffect != null)
         {
-            SpriteRenderer sr = targetObject.GetComponent<SpriteRenderer>();
-            if (sr != null)
+            var ps = visualEffect.GetComponent<ParticleSystem>();
+            if (ps != null)
             {
-                spriteMat = sr.material;
-                if (spriteMat.HasProperty("_OutlineThickness"))
-                {
-                    spriteMat.SetFloat("_OutlineThickness", 0); 
-                }
-                else
-                {
-                    Debug.LogWarning("材质上没有 '_OutlineThickness' 属性！");
-                }
+                ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            }
+            else
+            {
+                visualEffect.SetActive(false);
             }
         }
     }
@@ -49,27 +54,75 @@ public class PlaySoundOnKeyPress : MonoBehaviour
     {
         if (Input.GetKeyDown(keyToPress))
         {
-            Debug.Log($"按下按键：{keyToPress}");
+            Debug.Log($"Pressed key: {keyToPress}");
 
-            if (clip != null)
+            PlayRandomClipsByLevel();
+
+            if (instrumentInput != null)
             {
-                audioSource.PlayOneShot(clip);
+                instrumentInput.OnClick();
             }
 
-            if (spriteMat != null)
-            {
-                spriteMat.SetFloat("_OutlineThickness", outlineThickness);
-                CancelInvoke(nameof(DisableOutline));
-                Invoke(nameof(DisableOutline), outlineDuration);
-            }
+            TriggerEffectOrAnimation();
         }
     }
 
-    void DisableOutline()
+    void PlayRandomClipsByLevel()
     {
-        if (spriteMat != null)
+        AudioClip[] sourceClips = null;
+
+        switch (instrumentInput.currentLevel)
         {
-            spriteMat.SetFloat("_OutlineThickness", 0);
+            case 0: sourceClips = clipsLevel1; break;
+            case 1: sourceClips = clipsLevel2; break;
+            case 2:
+            default: sourceClips = clipsLevel3; break;
+        }
+
+        if (sourceClips == null || sourceClips.Length == 0)
+        {
+            Debug.LogWarning("No audio clips available for current level.");
+            return;
+        }
+
+        int clipCount = Mathf.Min(sourceClips.Length, Random.Range(1, 4));
+        List<int> usedIndices = new List<int>();
+
+        for (int i = 0; i < clipCount; i++)
+        {
+            int index;
+            do
+            {
+                index = Random.Range(0, sourceClips.Length);
+            } while (usedIndices.Contains(index));
+
+            usedIndices.Add(index);
+            audioSource.PlayOneShot(sourceClips[index]);
+        }
+    }
+
+    void TriggerEffectOrAnimation()
+    {
+        // 粒子或普通特效
+        if (visualEffect != null)
+        {
+            var ps = visualEffect.GetComponent<ParticleSystem>();
+            if (ps != null)
+            {
+                ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                ps.Play();
+            }
+            else
+            {
+                visualEffect.SetActive(false); // 闪一下视觉效果
+                visualEffect.SetActive(true);
+            }
+        }
+
+        // Animator 可选触发
+        if (targetAnimator != null && !string.IsNullOrEmpty(triggerName))
+        {
+            targetAnimator.SetTrigger(triggerName);
         }
     }
 }
