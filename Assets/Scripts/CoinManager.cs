@@ -12,7 +12,7 @@ public class CoinManager : MonoBehaviour
     public Transform defaultTarget;
 
     [Header("Coin Spawn Settings")]
-    public float coinScaleMultiplier = 1f;  // 可用于整体缩放飞行金币
+    public float coinScaleMultiplier = 1f; 
 
     public int CurrentCoins { get; private set; } = 0;
 
@@ -51,38 +51,36 @@ public class CoinManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("⚠️ Coin Text UI 未绑定！");
+            Debug.LogWarning("⚠️ no coin text setting!");
         }
     }
 
     /// <summary>
-    /// 生成金币并飞向目标位置（带动画）
     /// </summary>
-    /// <param name="startPos">生成起点（通常为乐器位置）</param>
-    /// <param name="target">金币飞向的目标位置</param>
-    /// <param name="coinPrefab">金币Prefab（必须是3D模型）</param>
+    /// <param name="startPos"></param>
+    /// <param name="target"></param>
+    /// <param name="coinPrefab"></param>
     public void Spawn3DCoin(Vector3 startPos, Transform target, GameObject coinPrefab)
     {
         if (coinPrefab == null)
         {
-            Debug.LogWarning("⚠️ 没有设置金币 Prefab！");
+            Debug.LogWarning("⚠️ no coin setting Prefab！");
             return;
         }
 
         if (target == null)
         {
-            Debug.LogWarning("⚠️ 没有指定目标点！使用默认 target。");
+            Debug.LogWarning("⚠️ no target setting！use default target.");
             target = defaultTarget;
         }
 
         GameObject coin = Instantiate(coinPrefab, startPos, Quaternion.identity);
 
-        // ✅ 保留 Prefab 本身的缩放，但可选乘以一个系数
+    
         coin.transform.localScale *= coinScaleMultiplier;
 
-        // 自动播放 Animator（如旋转），无需额外处理
 
-        // 移动金币至目标点后销毁
+        
         LeanTween.move(coin, target.position, 0.5f)
             .setEaseInCubic()
             .setOnComplete(() => Destroy(coin));

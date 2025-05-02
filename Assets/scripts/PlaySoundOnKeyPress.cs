@@ -17,9 +17,9 @@ public class PlaySoundOnKeyPress : MonoBehaviour
     public AudioClip[] clipsLevel3;
 
     [Header("Effect / Animator")]
-    public GameObject visualEffect;         // 可选：粒子效果或闪光 GameObject
-    public Animator targetAnimator;         // 可选：Animator 控件
-    public string triggerName = "Play";     // Animator Trigger 名称
+    public GameObject visualEffect;         
+    public Animator targetAnimator;        
+    public string triggerName = "Play";    
 
     private AudioSource audioSource;
     private InstrumentInput instrumentInput;
@@ -103,7 +103,7 @@ public class PlaySoundOnKeyPress : MonoBehaviour
 
     void TriggerEffectOrAnimation()
     {
-        // 粒子或普通特效
+    
         if (visualEffect != null)
         {
             var ps = visualEffect.GetComponent<ParticleSystem>();
@@ -114,12 +114,12 @@ public class PlaySoundOnKeyPress : MonoBehaviour
             }
             else
             {
-                visualEffect.SetActive(false); // 闪一下视觉效果
+                visualEffect.SetActive(false); 
                 visualEffect.SetActive(true);
             }
         }
 
-        // Animator 可选触发
+       
         if (targetAnimator != null && !string.IsNullOrEmpty(triggerName))
         {
             targetAnimator.SetTrigger(triggerName);

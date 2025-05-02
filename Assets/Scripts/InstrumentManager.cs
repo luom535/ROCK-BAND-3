@@ -13,7 +13,7 @@ public class InstrumentManager : MonoBehaviour
     public GameObject level2Background;
     public GameObject level3Background;
 
-    private int lastDetectedLevel = 1; // 当前处于哪个阶段（默认是Level1）
+    private int lastDetectedLevel = 1; 
 
     void Awake()
     {
@@ -52,12 +52,12 @@ public class InstrumentManager : MonoBehaviour
 
     void SwitchBackground(int level)
     {
-        // 全部隐藏
+        
         if (level1Background != null) level1Background.SetActive(false);
         if (level2Background != null) level2Background.SetActive(false);
         if (level3Background != null) level3Background.SetActive(false);
 
-        // 激活对应等级背景
+
         switch (level)
         {
             case 1:
@@ -71,6 +71,6 @@ public class InstrumentManager : MonoBehaviour
                 break;
         }
 
-        Debug.Log($"背景切换至 Level {level}");
+        Debug.Log($"background switch to Level {level}");
     }
 }

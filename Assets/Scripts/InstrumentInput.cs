@@ -6,13 +6,13 @@ public class InstrumentInput : MonoBehaviour
     [Header("升级与金币设置")]
     public int currentLevel = 0;
     public int maxLevel = 3;
-    public int[] upgradeCosts;           // 每级升级所需金币
-    public int[] coinOutputs;            // 每级产出金币数
+    public int[] upgradeCosts;       
+    public int[] coinOutputs;         
 
     [Header("金币相关设置")]
-    public GameObject[] coinPrefabs;     // 不同等级对应的金币Prefab（Level1~3）
-    public Transform coinStartPoint;     // 金币飞出起点（每个乐器独立）
-    public Transform coinTargetPoint;    // 金币飞行终点（所有乐器共享）
+    public GameObject[] coinPrefabs;    
+    public Transform coinStartPoint;    
+    public Transform coinTargetPoint;  
 
     private CoinManager coinManager;
     private AudienceFireManager fireManager;
@@ -39,7 +39,7 @@ public class InstrumentInput : MonoBehaviour
     {
         int baseCoins = coinOutputs[Mathf.Clamp(currentLevel, 0, coinOutputs.Length - 1)];
 
-        // 获取倍率（1、2、3）
+
         int multiplier = InstrumentManager.Instance != null ? InstrumentManager.Instance.GetCoinMultiplier() : 1;
 
         int totalCoins = baseCoins * multiplier;
@@ -55,7 +55,7 @@ public class InstrumentInput : MonoBehaviour
 
         if (coinPrefab != null && coinStartPoint != null && coinTargetPoint != null)
         {
-            // 每次产生 multiplier 个金币飞行
+          
             for (int i = 0; i < multiplier; i++)
             {
                 coinManager.Spawn3DCoin(coinStartPoint.position, coinTargetPoint, coinPrefab);
